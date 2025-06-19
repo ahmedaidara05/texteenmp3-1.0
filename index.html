@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecteur de Texte</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Lecteur de Texte avec Voix</h1>
+        <textarea id="textInput" placeholder="Collez votre texte ici..." rows="10"></textarea>
+        <div class="controls">
+            <label for="voiceSelect">Choisir une voix :</label>
+            <select id="voiceSelect"></select>
+            <button id="playButton">Lire</button>
+            <button id="downloadButton" disabled>Télécharger MP3</button>
+        </div>
+        <p id="status"></p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
