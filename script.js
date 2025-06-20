@@ -1,5 +1,5 @@
 // Configuration
-const ELEVENLABS_API_KEY = 'YOUR_ELEVENLABS_API_KEY'; // Remplacez par votre clé API
+const ELEVENLABS_API_KEY = 'sk_2b2dbd52afe8b1cdeb535bfa988ea9949d0938fbf1e70e87'; // Remplacez par votre clé API
 const PROXY_URL = 'http://localhost:3000/tts'; // Ou votre URL Heroku/Render
 const MAX_TEXT_LENGTH = 5000;
 
