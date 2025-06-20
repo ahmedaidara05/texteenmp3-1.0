@@ -9,20 +9,25 @@
 <body>
     <div class="container">
         <h1>Lecteur de Livres Saints</h1>
-        <textarea id="textInput" placeholder="Collez votre texte sacré ici..." rows="10"></textarea>
+        <textarea id="textInput" placeholder="Collez votre texte sacré ici..." rows="10" spellcheck="false"></textarea>
         <div class="controls">
-            <label for="languageSelect">Langue :</label>
-            <select id="languageSelect">
-                <option value="fr">Français</option>
-                <option value="en">Anglais</option>
-                <option value="ar">Arabe</option>
-            </select>
-            <label for="voiceSelect">Voix :</label>
-            <select id="voiceSelect"></select>
+            <div class="select-group">
+                <label for="languageSelect">Langue :</label>
+                <select id="languageSelect">
+                    <option value="fr">Français</option>
+                    <option value="en">Anglais</option>
+                    <option value="ar">Arabe</option>
+                </select>
+            </div>
+            <div class="select-group">
+                <label for="voiceSelect">Voix :</label>
+                <select id="voiceSelect"></select>
+            </div>
             <button id="playButton">Lire</button>
             <button id="downloadButton">Télécharger MP3</button>
         </div>
-        <p id="status"></p>
+        <p id="status" class="status"></p>
+        <div id="progress" class="progress hidden"></div>
     </div>
     <script src="script.js"></script>
 </body>
