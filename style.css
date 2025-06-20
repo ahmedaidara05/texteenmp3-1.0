@@ -1,94 +1,152 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
+    font-family: 'Georgia', serif;
+    background: linear-gradient(135deg, #e0e7ff, #f5f7fa);
     display: flex;
     justify-content: center;
+    align-items: center;
+    min-height: 100vh;
     margin: 0;
     padding: 20px;
+    color: #2d3748;
 }
 
 .container {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    max-width: 700px;
     width: 100%;
     text-align: center;
 }
 
 h1 {
-    color: #333;
-    font-size: 24px;
+    font-size: 28px;
     margin-bottom: 20px;
+    color: #1a202c;
+    font-weight: 600;
 }
 
 textarea {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    padding: 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
     resize: vertical;
     font-size: 16px;
+    font-family: 'Georgia', serif;
+    background: #f7fafc;
+    transition: border-color 0.3s;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #4a5568;
 }
 
 .controls {
-    margin: 20px 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 15px;
     justify-content: center;
     align-items: center;
+    margin: 20px 0;
+}
+
+.select-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 label {
-    font-size: 16px;
-    color: #555;
+    font-size: 14px;
+    color: #4a5568;
+    margin-bottom: 5px;
+    font-weight: 500;
 }
 
 select, button {
-    padding: 10px;
+    padding: 10px 15px;
     font-size: 16px;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
+    transition: all 0.3s;
 }
 
 select {
-    border: 1px solid #ccc;
-    background: #fff;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #2d3748;
 }
 
 button {
-    background: #28a745;
-    color: white;
+    background: #2b6cb0;
+    color: #ffffff;
     border: none;
+    font-weight: 500;
+}
+
+button:hover:not(:disabled) {
+    background: #2c5282;
+    transform: translateY(-1px);
 }
 
 button:disabled {
-    background: #ccc;
+    background: #cbd5e0;
     cursor: not-allowed;
 }
 
 #downloadButton {
-    background: #007bff;
+    background: #38a169;
 }
 
-p#status {
-    color: #555;
+#downloadButton:hover:not(:disabled) {
+    background: #2f855a;
+}
+
+.status {
     font-size: 14px;
+    color: #718096;
     margin-top: 10px;
+}
+
+.progress {
+    width: 100%;
+    height: 8px;
+    background: #edf2f7;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 100%;
+    background: #2b6cb0;
+    transition: width 0.3s;
+}
+
+.progress.hidden {
+    display: none;
 }
 
 @media (max-width: 480px) {
     .container {
-        padding: 10px;
+        padding: 20px;
     }
 
     h1 {
-        font-size: 20px;
+        font-size: 24px;
     }
 
     textarea, select, button {
         font-size: 14px;
+    }
+
+    .controls {
+        flex-direction: column;
     }
 }
