@@ -1,50 +1,88 @@
 const textInput = document.getElementById('textInput');
+const languageSelect = document.getElementById('languageSelect');
 const voiceSelect = document.getElementById('voiceSelect');
 const playButton = document.getElementById('playButton');
 const downloadButton = document.getElementById('downloadButton');
 const status = document.getElementById('status');
 
-let voices = [];
+// Liste des voix par langue (basée sur ttsMP3.com)
+const voicesByLanguage = {
+    fr: [
+        { name: 'Léa (Français)', value: 'fr-fr_1' },
+        { name: 'Mathieu (Français)', value: 'fr-fr_2' }
+    ],
+    en: [
+        { name: 'Joanna (Anglais US)', value: 'en-us_1' },
+        { name: 'Matthew (Anglais US)', value: 'en-us_2' },
+        { name: 'Emma (Anglais UK)', value: 'en-uk_1' }
+    ],
+    ar: [
+        { name: 'Zeina (Arabe)', value: 'ar_1' },
+        { name: 'Hala (Arabe)', value: 'ar_2' }
+    ]
+};
 
-// Charger les voix disponibles
-function loadVoices() {
-    voices = speechSynthesis.getVoices();
+// Mettre à jour les voix en fonction de la langue
+function updateVoices() {
+    const lang = languageSelect.value;
     voiceSelect.innerHTML = '';
-    voices.forEach((voice, index) => {
+    voicesByLanguage[lang].forEach(voice => {
         const option = document.createElement('option');
-        option.value = index;
-        option.textContent = `${voice.name} (${voice.lang})`;
+        option.value = voice.value;
+        option.textContent = voice.name;
         voiceSelect.appendChild(option);
     });
 }
 
-speechSynthesis.onvoiceschanged = loadVoices;
+// Initialiser les voix
+languageSelect.addEventListener('change', updateVoices);
+updateVoices();
 
-// Lire le texte
-playButton.addEventListener('click', () => {
+// Lire le texte via ttsMP3.com
+playButton.addEventListener('click', async () => {
     const text = textInput.value.trim();
     if (!text) {
         status.textContent = 'Veuillez entrer du texte.';
         return;
     }
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    const selectedVoice = voices[voiceSelect.value];
-    utterance.voice = selectedVoice;
-    utterance.onend = () => {
-        status.textContent = 'Lecture terminée.';
-        downloadButton.disabled = false;
-    };
-    utterance.onerror = () => {
-        status.textContent = 'Erreur lors de la lecture.';
-    };
+    const lang = languageSelect.value;
+    const voice = voiceSelect.value;
 
-    speechSynthesis.cancel();
-    speechSynthesis.speak(utterance);
     status.textContent = 'Lecture en cours...';
+    playButton.disabled = true;
+
+    try {
+        const response = await fetch(`https://ttsmp3.com/makemp3_new.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                msg: text,
+                lang: voice,
+                source: 'ttsmp3'
+            })
+        });
+
+        const data = await response.json();
+        if (data.Error !== 0) throw new Error('Erreur lors de la génération audio.');
+
+        const audio = new Audio(data.URL);
+        audio.play();
+        audio.onended = () => {
+            status.textContent = 'Lecture terminée.';
+            playButton.disabled = false;
+        };
+        audio.onerror = () => {
+            status.textContent = 'Erreur lors de la lecture.';
+            playButton.disabled = false;
+        };
+    } catch (error) {
+        status.textContent = `Erreur : ${error.message}`;
+        playButton.disabled = false;
+    }
 });
 
-// Télécharger en MP3 via une API (exemple avec gTTS via proxy)
+// Télécharger en MP3
 downloadButton.addEventListener('click', async () => {
     const text = textInput.value.trim();
     if (!text) {
@@ -52,29 +90,30 @@ downloadButton.addEventListener('click', async () => {
         return;
     }
 
+    const lang = languageSelect.value;
+    const voice = voiceSelect.value;
+
     status.textContent = 'Génération du MP3 en cours...';
     downloadButton.disabled = true;
 
     try {
-        // Utiliser une API comme gTTS via un proxy (remplacez l'URL par votre propre proxy ou service)
-        const response = await fetch('https://api.gtts.io/tts', {
+        const response = await fetch(`https://ttsmp3.com/makemp3_new.php`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                text: text,
-                lang: voices[voiceSelect.value].lang.split('-')[0] || 'fr',
-            }),
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                msg: text,
+                lang: voice,
+                source: 'ttsmp3'
+            })
         });
 
-        if (!response.ok) throw new Error('Erreur lors de la génération du MP3.');
+        const data = await response.json();
+        if (data.Error !== 0) throw new Error('Erreur lors de la génération du MP3.');
 
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = 'texte_lu.mp3';
+        a.href = data.URL;
+        a.download = 'livre_saint.mp3';
         a.click();
-        URL.revokeObjectURL(url);
 
         status.textContent = 'Téléchargement terminé !';
     } catch (error) {
