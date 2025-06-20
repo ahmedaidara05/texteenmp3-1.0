@@ -1,7 +1,7 @@
 // Configuration
 const ELEVENLABS_API_KEY = 'YOUR_ELEVENLABS_API_KEY'; // Remplacez par votre clé API
-const PROXY_URL = 'https://cors-anywhere.herokuapp.com/'; // Proxy pour éviter CORS
-const MAX_TEXT_LENGTH = 5000; // Limite par segment (ajustable)
+const PROXY_URL = 'http://localhost:3000/tts'; // Ou votre URL Heroku/Render
+const MAX_TEXT_LENGTH = 5000;
 
 // Éléments DOM
 const textInput = document.getElementById('textInput');
@@ -16,7 +16,7 @@ const progress = document.getElementById('progress');
 const voicesByLanguage = {
     fr: [
         { name: 'Rachel (Solennelle)', id: '21m00Tcm4TlvDq8ikWAM' },
-        { name: 'Antoni (Clair)', id: 'ErkFczuP4hL8fS2lXz5n' },
+        { name: 'Antoni (Clair)', id: 'ErXwobaYiN019PkySvjV' },
         { name: 'Bella (Douce)', id: 'EXAVITQu4vr4xnSDxMaL' },
         { name: 'Josh (Chaleureux)', id: 'TxGEqnHWrfWFTfGW9XjX' },
         { name: 'Sophie (Élégante)', id: 'pNInz6obpgDQGcFmaJg2' }
@@ -29,15 +29,15 @@ const voicesByLanguage = {
         { name: 'Lily (Chaleureuse)', id: 'pFZP5JQG7iQjIQuC4Bku' }
     ],
     ar: [
-        { name: 'Hassan (Respectueux)', id: '21m00Tcm4TlvDq8ikWAM' }, // Placeholder, ajuster avec IDs réels
-        { name: 'Amina (Clair)', id: 'ErkFczuP4hL8fS2lXz5n' },
+        { name: 'Hassan (Respectueux)', id: 'pNInz6obpgDQGcFmaJg2' }, // Remplacer par IDs réels si disponibles
+        { name: 'Amina (Clair)', id: 'ErXwobaYiN019PkySvjV' },
         { name: 'Omar (Solennel)', id: 'EXAVITQu4vr4xnSDxMaL' },
         { name: 'Fatima (Douce)', id: 'TxGEqnHWrfWFTfGW9XjX' },
-        { name: 'Khalid (Profond)', id: 'pNInz6obpgDQGcFmaJg2' }
+        { name: 'Khalid (Profond)', id: '21m00Tcm4TlvDq8ikWAM' }
     ]
 };
 
-// Mettre à jour les voix selon la langue
+// Mettre à jour les voix
 function updateVoices() {
     const lang = languageSelect.value;
     voiceSelect.innerHTML = '';
@@ -52,7 +52,7 @@ function updateVoices() {
 languageSelect.addEventListener('change', updateVoices);
 updateVoices();
 
-// Diviser le texte en segments
+// Diviser le texte
 function splitText(text, maxLength) {
     const segments = [];
     let currentSegment = '';
@@ -70,12 +70,11 @@ function splitText(text, maxLength) {
     return segments;
 }
 
-// Mettre à jour la barre de progression
+// Mettre à jour la progression
 function updateProgress(current, total) {
     const percentage = (current / total) * 100;
-    progress.style.setProperty('--width', `${percentage}%`);
-    progress.classList.remove('hidden');
     progress.style.width = `${percentage}%`;
+    progress.classList.remove('hidden');
 }
 
 // Lire le texte
@@ -86,7 +85,11 @@ playButton.addEventListener('click', async () => {
         return;
     }
 
-    const lang = languageSelect.value;
+    if (!ELEVENLABS_API_KEY || ELEVENLABS_API_KEY === 'YOUR_ELEVENLABS_API_KEY') {
+        status.textContent = 'Erreur : Clé API ElevenLabs manquante.';
+        return;
+    }
+
     const voiceId = voiceSelect.value;
     const segments = splitText(text, MAX_TEXT_LENGTH);
 
@@ -97,20 +100,20 @@ playButton.addEventListener('click', async () => {
     try {
         for (let i = 0; i < segments.length; i++) {
             updateProgress(i, segments.length);
-            const response = await fetch(`${PROXY_URL}https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+            const response = await fetch(PROXY_URL, {
                 method: 'POST',
-                headers: {
-                    'xi-api-key': ELEVENLABS_API_KEY,
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     text: segments[i],
-                    model_id: 'eleven_multilingual_v2',
-                    voice_settings: { stability: 0.75, similarity_boost: 0.75 }
+                    voiceId,
+                    apiKey: ELEVENLABS_API_KEY
                 })
             });
 
-            if (!response.ok) throw new Error(`Erreur API : ${response.statusText}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Erreur API : ${errorData.error || response.statusText}`);
+            }
 
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
@@ -140,7 +143,11 @@ downloadButton.addEventListener('click', async () => {
         return;
     }
 
-    const lang = languageSelect.value;
+    if (!ELEVENLABS_API_KEY || ELEVENLABS_API_KEY === 'YOUR_ELEVENLABS_API_KEY') {
+        status.textContent = 'Erreur : Clé API ElevenLabs manquante.';
+        return;
+    }
+
     const voiceId = voiceSelect.value;
     const segments = splitText(text, MAX_TEXT_LENGTH);
 
@@ -152,24 +159,24 @@ downloadButton.addEventListener('click', async () => {
         const blobs = [];
         for (let i = 0; i < segments.length; i++) {
             updateProgress(i, segments.length);
-            const response = await fetch(`${PROXY_URL}https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+            const response = await fetch(PROXY_URL, {
                 method: 'POST',
-                headers: {
-                    'xi-api-key': ELEVENLABS_API_KEY,
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     text: segments[i],
-                    model_id: 'eleven_multilingual_v2',
-                    voice_settings: { stability: 0.75, similarity_boost: 0.75 }
+                    voiceId,
+                    apiKey: ELEVENLABS_API_KEY
                 })
             });
 
-            if (!response.ok) throw new Error(`Erreur API : ${response.statusText}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Erreur API : ${errorData.error || response.statusText}`);
+            }
+
             blobs.push(await response.blob());
         }
 
-        // Concaténer les blobs en un seul fichier MP3
         const combinedBlob = new Blob(blobs, { type: 'audio/mpeg' });
         const url = URL.createObjectURL(combinedBlob);
         const a = document.createElement('a');
